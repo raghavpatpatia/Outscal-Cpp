@@ -47,11 +47,6 @@ public:
             XPDrop();
         }
     }
-};
-
-class FlyingEnemy : public Enemy
-{
-public:
     void SetAttackPower(int power)
     {
         this->attackPower = power;
@@ -68,6 +63,11 @@ public:
     {
         this->XP = XP;
     }
+};
+
+class FlyingEnemy : public Enemy
+{
+public:
     void FlyAttack()
     {
         if (attackRange > 0)
@@ -108,22 +108,6 @@ public:
 class GroundEnemy : public Enemy
 {
 public:
-    void SetAttackPower(int power)
-    {
-        this->attackPower = power;
-    }
-    void SetAttackRange(int range)
-    {
-        this->attackRange = range;
-    }
-    void SetLevel(int level)
-    {
-        this->level = level;
-    }
-    void SetXP(int XP)
-    {
-        this->XP = XP;
-    }
     void GroundAttack()
     {
         if (attackRange > 0)
