@@ -11,8 +11,6 @@ private:
     short RED = 10;
     short BLUE = 20;
     short sum = 0;
-    short redCount = 0;
-    short blueCount = 0;
 
 public:
     string GenerateRandomString()
