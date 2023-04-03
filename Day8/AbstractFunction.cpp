@@ -10,7 +10,7 @@ public:
 class BossEnemy : public Enemy
 {
 public: 
-    virtual void attack()
+    void attack()
     {
         cout << endl << "Boss is attacking" << endl;
     }

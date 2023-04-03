@@ -18,113 +18,141 @@ public:
     int GetDoors() {return doors;}
     int GetCapacity() {return capacity;}
     int GetTopSpeed() {return topSpeed;}
-    virtual void StartVehicle() = 0;
-    virtual void Accelerate() = 0;
-    virtual void StopVehicle() = 0;
-    virtual void CarDetails() = 0;
-    virtual void CarCrashed()
+    virtual void StartVehicle()
     {
-        cout << endl << "Your car was destroyed in an accident..." << endl;
+        cout << endl << "Starting your car";
     }
-    ~NFSCar()
+    virtual void Accelerate()
     {
-        CarCrashed();
+        cout << endl << "Your car is reaching to its top speed.";
+    }
+    virtual void StopVehicle()
+    {
+        cout << endl << "Stopping your car";
+    }
+    virtual void CarDetails()
+    {
+        cout << endl << "It is a NFS car.";
+    }
+    virtual ~NFSCar()
+    {
+        cout << "Your car was destroyed...";
     }
 };
 
 class Lamborghini : public NFSCar
 {
 public:
-    virtual void StartVehicle()
+    void StartVehicle()
     {
-        cout << endl << "Starting my car - Lamborghini" << endl;
+        cout << endl << "Starting my car - Lamborghini";
     }
-    virtual void Accelerate()
+    void Accelerate()
     {
-        cout << endl << "Lamborghini reaching top speed of: " << GetTopSpeed() << "Kmph." << endl;
+        cout << endl << "Lamborghini reaching top speed of: " << GetTopSpeed() << "Kmph.";
     }
-    virtual void CarDetails()
+    void CarDetails()
     {
-        cout << endl << "Car Name: Lamborghini Aventador SVJ\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity() << endl;
+        cout << endl << "Car Name: Lamborghini Aventador SVJ\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity();
     }
-    virtual void StopVehicle()
+    void StopVehicle()
     {
-        cout << endl << "Stopping vehicle of type - Lamborghini" << endl;
+        cout << endl << "Stopping vehicle of type - Lamborghini";
+    }
+    ~Lamborghini()
+    {
+        cout << endl << "Your Lamborghini car was destroyed in an accident.";
     }
 };
 
 class Mercedes : public NFSCar
 {
 public:
-    virtual void StartVehicle()
+    void StartVehicle()
     {
-        cout << endl << "Starting my car - Mercedes" << endl;
+        cout << endl << "Starting my car - Mercedes";
     }
-    virtual void Accelerate()
+    void Accelerate()
     {
-        cout << endl << "Mercedes reaching top speed of: " << GetTopSpeed() << "Kmph." << endl;
+        cout << endl << "Mercedes reaching top speed of: " << GetTopSpeed() << "Kmph.";
     }
-    virtual void CarDetails()
+    void CarDetails()
     {
-        cout << endl << "Car Name: Mercedes-AMG One\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity() << endl;
+        cout << endl << "Car Name: Mercedes-AMG One\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity();
     }
-    virtual void StopVehicle()
+    void StopVehicle()
     {
-        cout << endl << "Stopping vehicle of type - Mercedes" << endl;
+        cout << endl << "Stopping vehicle of type - Mercedes";
+    }
+    ~Mercedes()
+    {
+        cout << endl << "Your Mercedes car was destroyed in an accident.";
     }
 };
 
 class BMW : public NFSCar
 {
 public:
-    virtual void StartVehicle()
+    void StartVehicle()
     {
-        cout << endl << "Starting my car - BMW" << endl;
+        cout << endl << "Starting my car - BMW";
     }
-    virtual void Accelerate()
+    void Accelerate()
     {
-        cout << endl << "BMW reaching top speed of: " << GetTopSpeed() << "Kmph." << endl;
+        cout << endl << "BMW reaching top speed of: " << GetTopSpeed() << "Kmph.";
     }
-    virtual void CarDetails()
+    void CarDetails()
     {
-        cout << endl << "Name: BMW M8 Competition\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity() << endl;
+        cout << endl << "Name: BMW M8 Competition\n" << "Car Engine: " << GetEngine() << endl << "Car Doors: " << GetDoors() << endl << "Car Capacity: " << GetCapacity();
     }
-    virtual void StopVehicle()
+    void StopVehicle()
     {
-        cout << endl << "Stopping vehicle of type - BMW" << endl;
+        cout << endl << "Stopping vehicle of type - BMW";
+    }
+    ~BMW()
+    {
+        cout << endl << "Your BMW car was destroyed in an accident.";
     }
 };
 
 int main()
 {
-    NFSCar *car;
-    car = new Lamborghini();
-    car->SetEngine(6498);
-    car->SetDoors(2);
-    car->SetCapacity(2);
-    car->SetTopSpeed(352);
-    car->StartVehicle();
-    car->Accelerate();
-    car->CarDetails();
-    car->StopVehicle();
-    car = new BMW();
-    car->SetEngine(4395);
-    car->SetDoors(2);
-    car->SetCapacity(4);
-    car->SetTopSpeed(250);
-    car->StartVehicle();
-    car->Accelerate();
-    car->CarDetails();
-    car->StopVehicle();
-    car = new Mercedes();
-    car->SetEngine(1599);
-    car->SetDoors(2);
-    car->SetCapacity(2);
-    car->SetTopSpeed(352);
-    car->StartVehicle();
-    car->Accelerate();
-    car->CarDetails();
-    car->StopVehicle();
-    delete car;
+    NFSCar *lamborghini = new Lamborghini();
+    NFSCar *bmw = new BMW();
+    NFSCar *mercedes = new Mercedes();
+
+    lamborghini->SetEngine(6498);
+    lamborghini->SetDoors(2);
+    lamborghini->SetCapacity(2);
+    lamborghini->SetTopSpeed(352);
+    lamborghini->StartVehicle();
+    lamborghini->Accelerate();
+    lamborghini->CarDetails();
+    lamborghini->StopVehicle();
+    cout << endl;
+    bmw->SetEngine(4395);
+    bmw->SetDoors(2);
+    bmw->SetCapacity(4);
+    bmw->SetTopSpeed(250);
+    bmw->StartVehicle();
+    bmw->Accelerate();
+    bmw->CarDetails();
+    bmw->StopVehicle();
+    cout << endl;
+    mercedes->SetEngine(1599);
+    mercedes->SetDoors(2);
+    mercedes->SetCapacity(2);
+    mercedes->SetTopSpeed(352);
+    mercedes->StartVehicle();
+    mercedes->Accelerate();
+    mercedes->CarDetails();
+    mercedes->StopVehicle();
+    cout << endl;
+    delete lamborghini;
+    cout << endl;
+    delete bmw;
+    cout << endl;
+    delete mercedes;
+    cout << endl;
     return 0;
 }

@@ -12,11 +12,11 @@ public:
 class Player : public PlayerInterface
 {
 public:
-    virtual void DoubleJump()
+    void DoubleJump()
     {
         cout << endl << "DoubleJump is overriden" << endl;
     }
-    virtual void Fire()
+    void Fire()
     {
         cout << endl << "Fire is overriden" << endl;
     }
