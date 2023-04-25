@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <memory>
 #include <ctime>
 
 using namespace std;
@@ -20,7 +21,7 @@ public:
     int GetHealth(){return health;}
     void SetHealth(int hp){health = hp;}
     int GetBaseDamage(){return baseDamage;}
-    virtual int SpecialAbility()
+    int SpecialAbility()
     {
         srand(time(0));
         if (rand() % 5 == 0)
@@ -45,7 +46,7 @@ private:
     int additionalDamage;
     int heal;
 public: 
-    Vampire() : Player(200, 50){}
+    Vampire() : Player(200, 50), additionalDamage(0), heal(0){}
     
     int GetAdditionalDamage() override 
     {
@@ -87,7 +88,14 @@ public:
         else
         {
             SetHealth(hl);
-            cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            if (GetHealth() > 200)
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is 200"<< endl;
+            }       
+            else
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            }
         }
     }
 
@@ -112,7 +120,7 @@ private:
     int additionalDamage;
     int heal;
 public: 
-    Warewolf() : Player(150, 80){}
+    Warewolf() : Player(150, 80), additionalDamage(0), heal(0){}
     int GetAdditionalDamage() override 
     {
         srand(time(0));
@@ -154,7 +162,14 @@ public:
         else
         {
             SetHealth(hl);
-            cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            if (GetHealth() > 150)
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is 150"<< endl;
+            }       
+            else
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            }
         }
     }
 
@@ -179,7 +194,7 @@ private:
     int additionalDamage;
     int heal;
 public: 
-    Golem() : Player(120, 80){}
+    Golem() : Player(120, 80), additionalDamage(0), heal(0){}
     int GetAdditionalDamage() override 
     {
         srand(time(0));
@@ -198,7 +213,7 @@ public:
         int special = SpecialAbility();
         if (special == 100)
         {
-            if (GetHealth() <= 20)
+            if (GetHealth() <= 50)
             {
                 damage += 50;
                 cout << "Golemn used his special ability Rage..." << endl;
@@ -229,7 +244,14 @@ public:
         else
         {
             SetHealth(hl);
-            cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            if (GetHealth() > 120)
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is 120"<< endl;
+            }       
+            else
+            {
+                cout << "You healed yourself for " << heal << " HP. Your current health is " << GetHealth() << endl;
+            }
         }
     }
 
@@ -247,138 +269,169 @@ public:
     }
 };
 
-// Starting rules
-void Rules()
+// GameEngine class for game logic and player selection
+class GameEngine
 {
-    cout << endl << "\t\t\t Battle Adventure Game" << endl;
-    cout << endl << "\t\t\t\tRules" << endl;
-    cout << endl << "1) Each Player Has only one turn at a time" << endl;
-    cout << "2) Each Player Has Different Damages, Heals, Additional Damage and SPECIAL ABILITY."<< endl;
-    cout << "NOTE: Each Special Ability has 20\% probability." << endl;
-    cout << "3) The one's helath is below 0 , will die and loose the game.." << endl;
-    cout << "4) Player can have two options in its turn, either to damage other player or to heal yourself.." << endl;
-    cout << "5) Press H to heal and D to damage!" << endl;
-    cout << endl << "\t\t There are three types of Player in our game" << endl;
-    cout << endl;
-    cout << "1) Vampire => High Health, High Heal , Avg Base Damage, High Additional Damage" << endl;
-    cout << " Specail Ability ~ Blood Seal(Leaves enemy with only 1 hp)" << endl;
-    cout << endl;
-    cout << endl;
-    cout << "2) Warewolf => Avg Health, High Heal , High Base Damage, Avg Additional Damage" << endl;
-    cout << " Specail Ability ~ Heal + Damage(in single turn)" << endl;
-    cout << endl;
-    cout << endl;
-    cout << "3) Golem => Low Health, Very High Heal , High Base Damage, Very High Additional Damage" << endl;
-    cout <<" Specail Ability(depends on health) ~ Rage(Damage increases when player is close to death)" << endl; 
-    cout << endl;
-}
-
-// Player character selection function
-void PlayerSelection(Player*& ptr)
-{
-    int choice;
-    do
+private:
+    // Starting rules
+    void Rules()
     {
-        cout << "Enter (1) for Vampire\nEnter (2) for Warewolf\nEnter (3) for Golem" << endl;
-        cin >> choice;
-        switch (choice)
+        cout << endl << "\t\t\t 2 Player Battle Adventure Game" << endl;
+        cout << endl << "\t\t\t\tRules" << endl;
+        cout << endl << "1) Each Player Has only one turn at a time" << endl;
+        cout << "2) Each Player Has Different Damages, Heals, Additional Damage and SPECIAL ABILITY."<< endl;
+        cout << "NOTE: Each Special Ability has 20\% probability." << endl;
+        cout << "3) The one's helath is below 0 , will die and loose the game.." << endl;
+        cout << "4) Player can have two options in its turn, either to damage other player or to heal yourself.." << endl;
+        cout << "5) Press H to heal and D to damage!" << endl;
+        cout << endl << "\t\t There are three types of Player in our game" << endl;
+        cout << endl;
+        cout << "1) Vampire => High Health, High Heal , Avg Base Damage, High Additional Damage" << endl;
+        cout << " Specail Ability ~ Blood Seal(Leaves enemy with only 1 hp)" << endl;
+        cout << endl;
+        cout << endl;
+        cout << "2) Warewolf => Avg Health, High Heal , High Base Damage, Avg Additional Damage" << endl;
+        cout << " Specail Ability ~ Heal + Damage(in single turn)" << endl;
+        cout << endl;
+        cout << endl;
+        cout << "3) Golem => Low Health, Very High Heal , High Base Damage, Very High Additional Damage" << endl;
+        cout <<" Specail Ability(depends on health) ~ Rage(Damage increases when player is close to death)" << endl; 
+        cout << endl;
+    }
+    
+    // Player character selection function
+    void PlayerSelection(Player*& ptr)
+    {
+        int choice;
+        do
         {
-            case 1:
-                ptr = new Vampire();
-                ptr->Stats();
-                break;
-            case 2:
-                ptr = new Warewolf();
-                ptr->Stats();
-                break;
-            case 3:
-                ptr = new Golem();
-                ptr->Stats();
-                break;
-            default:
-                cout << "Invalid choice. Try again." << endl;
-                break;
+            cout << "Enter (1) for Vampire\nEnter (2) for Warewolf\nEnter (3) for Golem" << endl;
+            cin >> choice;
+            switch (choice)
+            {
+                case 1:
+                    ptr = new Vampire();
+                    ptr->Stats();
+                    break;
+                case 2:
+                    ptr = new Warewolf();
+                    ptr->Stats();
+                    break;
+                case 3:
+                    ptr = new Golem();
+                    ptr->Stats();
+                    break;
+                default:
+                    cout << "Invalid choice. Try again." << endl;
+                    break;
+            }
+        } while(ptr == nullptr);
+    }
+
+    // Game Play logic
+    void Play(Player* player1, Player* player2)
+    {
+        // Initializing Variables
+        bool isPlayer1playing = true;
+        bool isPlayer1dead = false;
+        char input;
+        // Game loop till either player's health is 0
+        while(player1->GetHealth() > 0 && player2->GetHealth() > 0)
+        {
+            // Logic if Player 1 is playing
+            if (isPlayer1playing == true)
+            {
+                cout << "Player 1:\nPress (h) to heal and (d) to damage: ";
+                cin >> input;
+                if (input == 'H' || input == 'h')
+                {
+                    player1->Heal();
+                }
+                else if (input == 'D' || input == 'd')
+                {
+                    player1->Attack(player2);
+                }
+                else
+                {
+                    cout << "You wasted your turn!! Wrong input..." << endl;
+                }
+                isPlayer1playing = false;
+            }
+            // Logic if Player 2 is playing
+            else if (isPlayer1playing == false)
+            {
+                cout << "Player 2:\nPress (h) to heal and (d) to damage: ";
+                cin >> input;
+                if (input == 'H' || input == 'h')
+                {
+                    player2->Heal();
+                }
+                else if (input == 'D' || input == 'd')
+                {
+                    player2->Attack(player1);
+                }
+                else
+                {
+                    cout << "You wasted your turn!! Wrong input..." << endl;
+                }
+                isPlayer1playing = true;
+            }
+
+            // If Player1's health is 0 setting isPlayer1dead to true
+            if (player1->GetHealth() <= 0)
+            {
+                isPlayer1dead = true;
+            }
         }
-    } while(ptr == nullptr);
-}
+
+        // If Player 1 is dead
+        if (isPlayer1dead)
+        {
+        cout << endl;
+        delete player1;
+        cout << endl << "Congrats Player2 you won..." << endl;
+        cout << "Player2 died of exhaustion..." << endl;
+        delete player2;
+        }
+
+        // If Player 2 is dead
+        else
+        {
+        cout << endl;
+        delete player2;
+        cout << endl << "Congrats Player1 you won..." << endl;
+        cout << "Player1 died of exhaustion..." << endl;
+        delete player1;
+        }
+    }
+
+    // Game Play
+    void PlayGame()
+    {
+        Player* player1 = nullptr;
+        Player* player2 = nullptr;
+        // Player Selection
+        cout << "Player 1 select your character:" << endl;
+        PlayerSelection(player1);
+        cout << "Player 2 select your character:" << endl;
+        PlayerSelection(player2);
+        
+        // Game Play
+        Play(player1, player2);
+    }
+
+public:
+
+    GameEngine()
+    {
+       Rules();
+       PlayGame();
+    }  
+   
+};
 
 int main()
 {
-    // Initializing Variables
-    bool isPlayer1playing = true;
-    bool isPlayer1dead = false;
-    char input;
-
-    // Displaying stater rules
-    Rules();
-
-    // Player selection
-    Player* player1 = nullptr;
-    cout << "Player 1 select your character:" << endl;
-    PlayerSelection(player1);
-    Player* player2 = nullptr;
-    cout << "Player 2 select your character:" << endl;
-    PlayerSelection(player2);
-    
-    // Game loop till either player's health is 0
-    while(player1->GetHealth() > 0 && player2->GetHealth() > 0)
-    {
-        // Logic if Player 1 is playing
-        if (isPlayer1playing == true)
-        {
-            cout << "Player 1:\nPress (h) to heal and (d) to damage: ";
-            cin >> input;
-            if (input == 'H' || input == 'h')
-            {
-                player1->Heal();
-            }
-            if (input == 'D' || input == 'd')
-            {
-                player1->Attack(player2);
-            }
-            isPlayer1playing = false;
-        }
-        // Logic if Player 2 is playing
-        else if (isPlayer1playing == false)
-        {
-            cout << "Player 2:\nPress (h) to heal and (d) to damage: ";
-            cin >> input;
-            if (input == 'H' || input == 'h')
-            {
-                player2->Heal();
-            }
-            if (input == 'D' || input == 'd')
-            {
-                player2->Attack(player1);
-            }
-            isPlayer1playing = true;
-        }
-
-        // If Player1's health is 0 setting isPlayer1dead to true
-        if (player1->GetHealth() <= 0)
-        {
-            isPlayer1dead = true;
-        }
-    }
-
-    // If Player 1 is dead
-    if (isPlayer1dead)
-    {
-      cout << endl;
-      delete player1;
-      cout << endl << "Congrats Player2 you won..." << endl;
-      cout << "Player2 died of exhaustion..." << endl;
-      delete player2;
-    }
-
-    // If Player 2 is dead
-    else
-    {
-      cout << endl;
-      delete player2;
-      cout << endl << "Congrats Player1 you won..." << endl;
-      cout << "Player1 died of exhaustion..." << endl;
-      delete player1;
-    }
+    unique_ptr<GameEngine>game(new GameEngine());
     return 0;
 }
