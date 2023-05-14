@@ -515,6 +515,7 @@ private:
         return value;
     });
 public:
+    // Initialize Player for each level and show stats for each level
     void PlayerStats(Levels currentLevel)
     {
         switch(currentLevel)
@@ -546,6 +547,7 @@ public:
         }
     }
 
+    // Initialize enemies for each level
     void EnemiesInEachLevel(Levels currentLevel)
     {
         switch(currentLevel)
@@ -599,6 +601,7 @@ public:
         }
     }
 
+    // Level architecture to be shown in each level
     void LevelPattern(Levels currentLevel)
     {
         if (currentLevel == level6)
@@ -637,6 +640,7 @@ public:
         cout << endl << endl << endl;
     }
 
+    // Input system to take input from player
     void InputSystem(char input, Controller *player, Controller *enemy) 
     {
         bool validInput = false;
@@ -661,6 +665,7 @@ public:
         }
     }
 
+    // Battle loop
     void BattleLoop(Controller* player, Levels level)
     {
         char input;
@@ -735,6 +740,7 @@ public:
         validInput = false;
     }
 
+    // Conditions for each level
     void VictoryConditionsandBattle(Levels currentLevel)
     {
       Player* demon = new Player();
@@ -832,6 +838,7 @@ public:
       }
     }
 
+    // code that each level will execute
     void Level()
     {
       char input;
