@@ -8,8 +8,11 @@ using namespace std;
 // Enum for levels from 1-6
 enum Levels { level1 = 1, level2, level3, level4, level5, level6 };
 
+// Enum for player Items
+enum Items { sword, shield, armor, bow };
+
 // Enum for abilities
-enum Ability { map, sword, criticalHits, shield, lifesteal, armor, block, bow, invincible };
+enum Ability { criticalHits, lifesteal, block, invincible };
 
 // generates a random number between 2 numbers
 int randomNumber(int min = 0, int max = 100)
@@ -52,6 +55,7 @@ class Player : public CharacterController
 private:
     const int meleeDamage = 25;
     const int rangedDamage = 15;
+    vector<Items> item;
     vector<Ability> abilities;
 public:
     // Player default constructor
@@ -59,6 +63,23 @@ public:
 
     // Player parameterized constructor
     Player(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
+
+    // check if specific ability is enabled
+    bool HasItemandAbility(Ability ability, Items it)
+    {
+        return find((abilities.begin() && item.begin()), (abilities.end() && item.end()), ability) != (abilities.end() && item.end());
+    }
+
+    // Function to enable ability
+    void EnableItemandAbility(Ability ability, Items it)
+    {
+        // checking if ability is already enabled
+        if (!HasAbility(ability, it))
+        {
+            abilities.push_back(ability);
+            item.push_back(it);
+        }
+    }
 
     // Showing stats according to player's level
     void Stats(Levels level)
@@ -91,6 +112,54 @@ public:
                 cout << "Special Ability: Critical Hits (10\% chance)\nBlock (10\% chance)\nInvincibility (10\% chance)\nLife Steal (10\% chance)" << endl;
                 break;
         }
+    }
+
+    void Attack(CharacterController* enemy)
+    {
+        int randomDamage = 0;
+        randomDamage += randomNumber(20, GetAttackPower());
+        if (HasItemandAbility(criticalHits, sword))
+        {
+            randomDamage += meleeDamage;
+            if (randomNumber() < 10) // special ability for critical hit
+            {
+                cout << endl << "Special ability critical hits activated... Dealt additional damage of 5 points..." << endl;
+                randomDamage + 5;
+            }
+
+            else
+            {
+                if (HasItemandAbility(lifesteal, bow))
+                {
+                    randomDamage += rangedDamage;
+                    if (randomNumber() < 10) 
+                    {
+                        if (randomNumber(0, 2) > 0) // special ability life steal if random number is 1
+                        {
+                            cout << endl << "Special ability life steal activated..." << endl;
+                            cout << "Player's health increased by 50 points..." << endl;
+                            cout << "Player's previous health: " << GetHealth() << endl;
+                            cout << "Enemy's previous health: " << enemy->GetHealth() << endl;
+                            enemy->SetHealth(enemy->GetHealth() - 50);
+                            SetHealth(GetHealth() + 50);
+                            cout << "Player's current health: " << GetHealth() << endl;
+                            cout << "Enemy's current health: " << enemy->GetHealth() << endl << endl;
+                        }
+                        else // special ability critical hit if random number is 0
+                        {
+                            cout << endl << "Special ability critical hits activated... Dealt additional damage of 5 points..." << endl;
+                            randomDamage + 5;
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        cout << endl << "Enemy's Health (before damage): " << enemy->GetHealth() << endl;
+        cout << endl << "Enemy took damage of " << enemy->Defence(randomDamage) << endl;
+        enemy->TakeDamage(randomDamage);
+        cout << endl << "Enemy's current Health (after damage): " << enemy->GetHealth() << endl;
     }
 
     ~Player(){ cout << endl << "Player died..." << endl; }
