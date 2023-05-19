@@ -42,8 +42,25 @@ public:
     int GetDefence() { return defence; }
     int GetHeal() { return heal; }
     void SetHealth(int health) { this->health = health; }
+    void Ai(CharacterController *player) 
+    { 
+        if (randomNumber(0, 2) > 0)
+        {
+            cout << endl << "Enemy attacked the player..." << endl;
+            Attack(player);
+        }
+        else
+        {
+            cout << endl << "Enemy healed itself..." << endl;
+            Heal();
+        } 
+    }
+    int HealthPercent(int percent)
+    {
+        int maxHealthPercent = (GetMaxHealth() * percent) / 100;
+        return maxHealthPercent;
+    }
     virtual void Stats(Levels level) { cout << "Health: " << health << "\nAttack Power: " << attackPower << "\nHeal: " << heal << "\nDefence: " << defence; }
-    virtual void Ai(CharacterController *player) { cout << "AI for enemy class" << endl; }
     virtual void Attack(CharacterController *other) = 0;
     virtual int Defence(int damage) = 0;
     virtual void Heal() = 0;
@@ -240,15 +257,8 @@ class Enemy : public CharacterController
 {
 public:
 
-    // Initializing variables
+    // Enemy class parameterized constructor
     Enemy(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
-
-    // maximum health percent function
-    int HealthPercent(int percent)
-    {
-        int maxHealthPercent = (GetMaxHealth() * percent) / 100;
-        return maxHealthPercent;
-    }
 
     // Attack function
     void Attack (CharacterController* player)
@@ -270,8 +280,168 @@ public:
         cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
     }
 
+    // Heal function
+    void Heal()
+    {
+        int randHeal;
+        if (GetHealth() == GetMaxHealth())
+        {
+            cout << endl << "Enemy is already at full health..." << endl;
+        }
+        else
+        {
+            if (GetHealth() > HealthPercent(50))
+            {
+                randHeal = randomNumber(1, GetHeal());
+            }
+            else
+            {
+                randHeal = randomNumber(5, GetHeal());
+            }
+            
+            cout << endl << "Enemy's health (before heal): " << GetHealth() << endl;
+            SetHealth(GetHealth() + randHeal);
+            
+            if (GetHealth() > GetMaxHealth())
+            {
+                randHeal -= (GetHealth() - GetMaxHealth());
+                SetHealth(GetMaxHealth());
+            }
+            
+            cout << endl << "Enemy gained heal of " << randHeal << " points" << endl;
+            cout << endl << "Enemy's health (after heal): " << GetHealth() << endl;
+        }
+    }
+
+    // defence will activate only if health is less than 10 % of max health
+    int Defence(int damage)
+    {
+        if (GetHealth() < HealthPercent(10))
+        {
+            damage -= GetDefence();
+        }
+        return abs(damage);
+    }
+
+    // taking damage
+    void TakeDamage(int damage)
+    {
+        SetHealth(GetHealth() - Defence(damage));
+        if (GetHealth() < 0)
+        {
+            SetHealth(0);
+        }
+    }
+
+    // Destructor
     ~Enemy(){ cout << endl << "Enemy died..." << endl; }
 };
+
+class God : public CharacterController
+{
+
+public:
+
+    // God class parameterized constructor
+    God(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
+
+    // Special ability of boss player
+    int Smash(int damage)
+    {
+        cout << "King of Gods used special ability: Smash\n";
+        damage += 50;
+        return damage;
+    }
+
+    // Attack function
+    void Attack(CharacterController* player)
+    {
+        int randomDamage;
+        randomDamage += randomNumber(70, GetAttackPower());
+
+        if (GetHealth() > HealthPercent(50)) // If health is > 50% then attack damage will be 20 points extra
+        {
+            randomDamage += 20;
+        }
+
+        else if (GetHealth() < HealthPercent(25)) // If health is < 25% then attack damage will be 30 points extra
+        {
+            randomDamage += 30;
+        }
+        
+        if (randomNumber() < 10)
+        {
+            cout << endl << "Player's health(before taking damage): " << player->GetHealth() << endl;
+            player->TakeDamage(Smash(randomDamage));
+            cout << endl << "Player took damage of " << player->Defence(Smash(randomDamage)) << " points" << endl;
+            cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
+        }
+        else
+        {
+            cout << endl << "Player's health(before taking damage): " << player->GetHealth() << endl;
+            player->TakeDamage(randomDamage);
+            cout << endl << "Player took damage of " << player->Defence(randomDamage) << " points" << endl;
+            cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
+        }
+    }
+
+    // Heal function
+    void Heal()
+    {
+        int randHeal;
+        if (GetHealth() == GetMaxHealth())
+        {
+            cout << endl << "God is already at full health..." << endl;
+        }
+        else
+        {
+            if (GetHealth() > HealthPercent(50))
+            {
+                randHeal = randomNumber(20, GetHeal());
+            }
+            else
+            {
+                randHeal = randomNumber(30, GetHeal());
+            }
+            
+            cout << endl << "God's health (before heal): " << GetHealth() << endl;
+            SetHealth(GetHealth() + randHeal);
+            
+            if (GetHealth() > GetMaxHealth())
+            {
+                randHeal -= (GetHealth() - GetMaxHealth());
+                SetHealth(GetMaxHealth());
+            }
+
+            cout << endl << "God gained heal of " << randHeal << " points" << endl;
+            cout << endl << "God's health (after heal): " << GetHealth() << endl;
+        }
+    }
+
+    // defence will activate only if health is less than 10 % of max health
+    int Defence(int damage)
+    {
+        if (GetHealth() < HealthPercent(10))
+        {
+            damage -= GetDefence();
+        }
+        return abs(damage);
+    }
+
+    // taking damage
+    void TakeDamage(int damage)
+    {
+        SetHealth(GetHealth() - Defence(damage));
+        if (GetHealth() < 0)
+        {
+            SetHealth(0);
+        }
+    }
+
+    // Destructor
+    ~God(){ cout << endl << "King of Gods was defeated..." << endl; }
+};
+
 
 int main()
 {
