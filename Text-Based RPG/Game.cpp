@@ -65,17 +65,16 @@ public:
     // Player parameterized constructor
     Player(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
 
-    // check if specific ability is enabled
+    // check if specific ability and item is enabled
     bool HasItemandAbility(Ability ability, Items it)
     {
-        //return (count(abilities.begin(), abilities.end(), ability > 0) && (count(item.begin(), item.end(), it > 0));
         return (count(abilities.begin(), abilities.end(), ability > 0) && count(item.begin(), item.end(), it > 0));
     }
 
-    // Function to enable ability
+    // Function to enable ability and item
     void EnableItemandAbility(Ability ability, Items it)
     {
-        // checking if ability is already enabled
+        // checking if ability and item is already enabled
         if (!HasItemandAbility(ability, it))
         {
             abilities.push_back(ability);
