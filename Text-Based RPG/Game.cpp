@@ -2,6 +2,7 @@
 #include <ctime>
 #include <stdlib.h>
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 using namespace std;
@@ -115,6 +116,7 @@ public:
         }
     }
 
+    // Attack function
     void Attack(CharacterController* enemy)
     {
         int randomDamage = 0;
@@ -163,6 +165,73 @@ public:
         cout << endl << "Enemy's current Health (after damage): " << enemy->GetHealth() << endl;
     }
 
+    // Healing function
+    void Heal()
+    {
+        if (GetHealth() == GetMaxHealth())
+        {
+            cout << endl << "Player is already at full health..." << endl;
+            return;
+        }
+        cout << endl << "Player's health (before heal): " << GetHealth() << endl;
+        int randHeal = randomNumber(15, GetHeal());
+        int remainingHeal = GetMaxHealth() - GetHealth();
+        randHeal = min(randHeal, remainingHeal); // Limit heal amount to not exceed maxHealth
+
+        cout << endl << "Healing done: " << randHeal << " points" << endl;
+        SetHealth(GetHealth() + randHeal);
+
+        cout << endl << "Player's health (after heal): " << GetHealth() << endl;
+    }
+
+    // Defence function
+    int Defence(int damage)
+    {
+        int totalDamage = damage;
+        damage -= GetDefence();
+        if (HasItemandAbility(block, shield)) // if shield is unlocked
+        {
+            damage -= 10;
+            if (randomNumber() < 10) // checking if special ability block is activated
+            {
+                cout << endl << "Special ability block activated...\nOnly 1\% of actual damage is taken by the player" << endl;
+                damage = (totalDamage * 1) / 100;
+            }
+            else
+            {
+                if (HasItemandAbility(invincible, armor)) // checking if armor is unlocked
+                {
+                    damage -= 10;
+                    if (randomNumber() < 10) 
+                    {
+                        if (randomNumber(0, 2) > 0) // activating invincible ability if random number is 1
+                        {
+                            cout << endl <<"Special ability invincible activated...\nDamage taken: 0 points..." << endl;
+                            damage = 0;
+                        }
+                        else // activating block if random number is 0
+                        {
+                            cout << endl << "Special ability block activated...\nOnly 1\% of actual damage is taken by the player" << endl;
+                            damage = (totalDamage * 1) / 100;
+                        }
+                    }
+                }
+            }
+        }        
+        return abs(damage);
+    }
+
+    // taking damage function
+    void TakeDamage(int damage)
+    {
+        SetHealth(GetHealth() - Defence(damage));
+        if (GetHealth() < 0)
+        {
+            SetHealth(0);
+        }
+    }
+
+    // Player destructor
     ~Player(){ cout << endl << "Player died..." << endl; }
 
 };
