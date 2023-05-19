@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -337,6 +338,7 @@ public:
     ~Enemy(){ cout << endl << "Enemy died..." << endl; }
 };
 
+// God class
 class God : public CharacterController
 {
 
@@ -442,6 +444,75 @@ public:
     ~God(){ cout << endl << "King of Gods was defeated..." << endl; }
 };
 
+class Level
+{
+
+private:
+
+    vector<bool> hasEnemyDied;
+    vector<CharacterController*> enemy;
+    CharacterController* player = new Player();
+    bool allTrue = all_of(hasEnemyDied.begin(), hasEnemyDied.end(), [](bool value) {
+        return value;
+    });
+
+public:
+
+    // Input system to take input from player
+    void InputSystem(char input, CharacterController* player, CharacterController* enemy) 
+    {
+        bool validInput = false;
+        while (!validInput) 
+        {
+            cin >> input;
+            if (tolower(input) == 'a') 
+            {
+                player->Attack(enemy);
+                validInput = true;
+            } 
+            else if (tolower(input) == 'h') 
+            {
+                player->Heal();
+                validInput = true;
+            } 
+            else 
+            {
+                cout << endl << "Wrong Input try again..." << endl;
+            }
+        }
+    }
+
+    // Battle loop
+    void BattleLoop(CharacterController* player, Levels level)
+    {
+        char input;
+        for(int i = 0; i < level; i++)
+        {
+            if (!hasEnemyDied[i])
+            {
+                cout << endl << "Demon Lord's turn: ";
+                InputSystem(input, player, enemy[i]);
+                if (enemy[i]->GetHealth() <= 0) 
+                {
+                    delete enemy[i];
+                    hasEnemyDied[i] = true;
+                }
+                else
+                {
+                    cout << endl << "Enemy " << (i + 1) << " turn:" << endl;
+                    enemy[i]->Ai(player);
+                }
+            }
+            if (player->GetHealth() <= 0) 
+            {
+                delete player;
+                cout << endl << "You failed mission..." << endl;
+                exit(0);
+            }
+        }  
+    }
+
+};
 
 int main()
 {
