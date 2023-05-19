@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <stdlib.h>
+#include <algorithm>
 #include <vector>
 
 using namespace std;
@@ -67,14 +68,15 @@ public:
     // check if specific ability is enabled
     bool HasItemandAbility(Ability ability, Items it)
     {
-        return find((abilities.begin() && item.begin()), (abilities.end() && item.end()), ability) != (abilities.end() && item.end());
+        //return (count(abilities.begin(), abilities.end(), ability > 0) && (count(item.begin(), item.end(), it > 0));
+        return (count(abilities.begin(), abilities.end(), ability > 0) && count(item.begin(), item.end(), it > 0));
     }
 
     // Function to enable ability
     void EnableItemandAbility(Ability ability, Items it)
     {
         // checking if ability is already enabled
-        if (!HasAbility(ability, it))
+        if (!HasItemandAbility(ability, it))
         {
             abilities.push_back(ability);
             item.push_back(it);
