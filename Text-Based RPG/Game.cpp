@@ -59,8 +59,8 @@ private:
     const int rangedDamage = 15;
     vector<Items> item;
     vector<Ability> abilities;
-public:
-    // Player default constructor
+public:   
+     // Player default constructor
     Player(){}
 
     // Player parameterized constructor
@@ -233,7 +233,44 @@ public:
 
     // Player destructor
     ~Player(){ cout << endl << "Player died..." << endl; }
+};
 
+// Enemy class
+class Enemy : public CharacterController
+{
+public:
+
+    // Initializing variables
+    Enemy(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
+
+    // maximum health percent function
+    int HealthPercent(int percent)
+    {
+        int maxHealthPercent = (GetMaxHealth() * percent) / 100;
+        return maxHealthPercent;
+    }
+
+    // Attack function
+    void Attack (CharacterController* player)
+    {
+        int randomDamage;
+        randomDamage = randomNumber(10, GetAttackPower());
+        if (GetHealth() > HealthPercent(50)) // If health is > 50% then attack damage will be 10 points extra
+        {
+            randomDamage += 10;
+        }
+
+        else if (GetHealth() < HealthPercent(25)) // If health is < 25% then attack damage will br 20 points extra
+        {
+            randomDamage += 20;
+        }
+        cout << endl << "Player's health(before taking damage): " << player->GetHealth() << endl;
+        player->TakeDamage(randomDamage);
+        cout << endl << "Player took damage of " << player->Defence(randomDamage) << " points" << endl;
+        cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
+    }
+
+    ~Enemy(){ cout << endl << "Enemy died..." << endl; }
 };
 
 int main()
