@@ -1,23 +1,17 @@
 #include <iostream>
 #include <ctime>
 #include <stdlib.h>
-#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
-// Enum for levels from 1-6
 enum Levels { level1 = 1, level2, level3, level4, level5, level6 };
-
-// Enum for player Items
 enum Items { sword, shield, armor, bow };
-
-// Enum for abilities
 enum Ability { criticalHits, lifesteal, block, invincible };
 
-// generates a random number between 2 numbers
 int randomNumber(int min = 0, int max = 100)
 {
     srand(static_cast<unsigned int>(time(0)));
@@ -25,15 +19,14 @@ int randomNumber(int min = 0, int max = 100)
     return randNum;
 }
 
-// Abstract class character controller
-class CharacterController
-{
+class CharacterController {
 private:
     int health;
     int maxHealth;
     int heal;
     int attackPower;
     int defence;
+
 public:
     CharacterController(int hp, int atck, int hl, int def) : health(hp), attackPower(atck), heal(hl), defence(def) { maxHealth = hp; }
     int GetHealth() { return health; }
@@ -60,45 +53,36 @@ public:
         int maxHealthPercent = (GetMaxHealth() * percent) / 100;
         return maxHealthPercent;
     }
-    virtual void Stats(Levels level) { cout << "Health: " << health << "\nAttack Power: " << attackPower << "\nHeal: " << heal << "\nDefence: " << defence; }
-    virtual void EnableItemandAbility(Ability ability, Items it) {/*Enabling items and abilities of player*/}
-    virtual void Attack(CharacterController *other) = 0;
+    void Stats(Levels level) { cout << "Health: " << health << "\nAttack Power: " << attackPower << "\nHeal: " << heal << "\nDefence: " << defence; }
+    void EnableItemandAbility(Ability ability, Items it) {/*Enabling items and abilities of player*/}
+    virtual void Attack(CharacterController* other) = 0;
     virtual int Defence(int damage) = 0;
     virtual void Heal() = 0;
     virtual void TakeDamage(int damage) = 0;
-    virtual ~CharacterController() {}
+    virtual ~CharacterController();
 };
 
-// Player class
-class Player : public CharacterController
-{
+class Player : public CharacterController {
 private:
     const int meleeDamage = 25;
     const int rangedDamage = 15;
     vector<Items> item;
     vector<Ability> abilities;
-public:   
-    // Player parameterized constructor
-    Player(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
 
-    // check if specific ability and item is enabled
+public:
+    Player(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
     bool HasItemandAbility(Ability ability, Items it)
     {
         return (count(abilities.begin(), abilities.end(), ability > 0) && count(item.begin(), item.end(), it > 0));
     }
-
-    // Function to enable ability and item
     void EnableItemandAbility(Ability ability, Items it)
     {
-        // checking if ability and item is already enabled
         if (!HasItemandAbility(ability, it))
         {
             abilities.push_back(ability);
             item.push_back(it);
         }
     }
-
-    // Showing stats according to player's level
     void Stats(Levels level)
     {
         cout << endl << "Health: " << GetHealth() << endl;
@@ -130,8 +114,6 @@ public:
                 break;
         }
     }
-
-    // Attack function
     void Attack(CharacterController* enemy)
     {
         int randomDamage = 0;
@@ -173,14 +155,7 @@ public:
                 }
             }
         }
-
-        cout << endl << "Enemy's Health (before damage): " << enemy->GetHealth() << endl;
-        cout << endl << "Enemy took damage of " << enemy->Defence(randomDamage) << endl;
-        enemy->TakeDamage(randomDamage);
-        cout << endl << "Enemy's current Health (after damage): " << enemy->GetHealth() << endl;
     }
-
-    // Healing function
     void Heal()
     {
         if (GetHealth() == GetMaxHealth())
@@ -198,8 +173,6 @@ public:
 
         cout << endl << "Player's health (after heal): " << GetHealth() << endl;
     }
-
-    // Defence function
     int Defence(int damage)
     {
         int totalDamage = damage;
@@ -235,8 +208,6 @@ public:
         }        
         return abs(damage);
     }
-
-    // taking damage function
     void TakeDamage(int damage)
     {
         SetHealth(GetHealth() - Defence(damage));
@@ -245,21 +216,13 @@ public:
             SetHealth(0);
         }
     }
-
-    // Player destructor
     ~Player(){ cout << endl << "Player died..." << endl; }
 };
 
-// Enemy class
-class Enemy : public CharacterController
-{
+class Enemy : public CharacterController {
 public:
-
-    // Enemy class parameterized constructor
     Enemy(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
-
-    // Attack function
-    void Attack (CharacterController* player)
+    void Attack(CharacterController* player)
     {
         int randomDamage;
         randomDamage = randomNumber(10, GetAttackPower());
@@ -277,8 +240,6 @@ public:
         cout << endl << "Player took damage of " << player->Defence(randomDamage) << " points" << endl;
         cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
     }
-
-    // Heal function
     void Heal()
     {
         int randHeal;
@@ -310,8 +271,6 @@ public:
             cout << endl << "Enemy's health (after heal): " << GetHealth() << endl;
         }
     }
-
-    // defence will activate only if health is less than 10 % of max health
     int Defence(int damage)
     {
         if (GetHealth() < HealthPercent(10))
@@ -320,8 +279,6 @@ public:
         }
         return abs(damage);
     }
-
-    // taking damage
     void TakeDamage(int damage)
     {
         SetHealth(GetHealth() - Defence(damage));
@@ -330,29 +287,18 @@ public:
             SetHealth(0);
         }
     }
-
-    // Destructor
     ~Enemy(){ cout << endl << "Enemy died..." << endl; }
 };
 
-// God class
-class God : public CharacterController
-{
-
+class God : public CharacterController {
 public:
-
-    // God class parameterized constructor
     God(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
-
-    // Special ability of boss player
     int Smash(int damage)
     {
         cout << "King of Gods used special ability: Smash\n";
         damage += 50;
         return damage;
     }
-
-    // Attack function
     void Attack(CharacterController* player)
     {
         int randomDamage;
@@ -383,8 +329,6 @@ public:
             cout << endl << "Player's health(after taking damage): " << player->GetHealth() << endl;
         }
     }
-
-    // Heal function
     void Heal()
     {
         int randHeal;
@@ -416,8 +360,6 @@ public:
             cout << endl << "God's health (after heal): " << GetHealth() << endl;
         }
     }
-
-    // defence will activate only if health is less than 10 % of max health
     int Defence(int damage)
     {
         if (GetHealth() < HealthPercent(10))
@@ -426,8 +368,6 @@ public:
         }
         return abs(damage);
     }
-
-    // taking damage
     void TakeDamage(int damage)
     {
         SetHealth(GetHealth() - Defence(damage));
@@ -436,8 +376,6 @@ public:
             SetHealth(0);
         }
     }
-
-    // Destructor
     ~God(){ cout << endl << "King of Gods was defeated..." << endl; }
 };
 
@@ -447,16 +385,8 @@ protected:
     vector<bool> hasEnemyDied;
     vector<CharacterController*> enemy;
     CharacterController* player;
-    bool allTrue = all_of(hasEnemyDied.begin(), hasEnemyDied.end(), [](bool value){
-        return value;
-    });
-    bool anyEnemyAlive = any_of(hasEnemyDied.begin(), hasEnemyDied.end(), [](bool enemyDied) {
-        return !enemyDied;
-    });
-
-public:
-    // Input system to take input from player
-    void InputSystem(char input, CharacterController* player, CharacterController* enemy) 
+public:   
+    void InputSystem(char input, CharacterController* enemy)
     {
         bool validInput = false;
         while (!validInput) 
@@ -478,17 +408,23 @@ public:
             }
         }
     }
-
-    // Battle loop
-    void BattleLoop(CharacterController* player, Levels level)
+    bool AllTrue()
+    {
+        return all_of(hasEnemyDied.begin(), hasEnemyDied.end(), [](bool value){ return value; });
+    }
+    bool AnyEnemyAlive()
+    {
+        return any_of(hasEnemyDied.begin(), hasEnemyDied.end(), [](bool enemyDied) { return !enemyDied; });
+    }
+    virtual void BattleLoop()
     {
         char input;
-        for(int i = 0; i < level; i++)
+        for(int i = 0; i < enemy.size(); i++)
         {
             if (!hasEnemyDied[i])
             {
                 cout << endl << "Demon Lord's turn: ";
-                InputSystem(input, player, enemy[i]);
+                InputSystem(input, enemy[i]);
                 if (enemy[i]->GetHealth() <= 0) 
                 {
                     delete enemy[i];
@@ -506,111 +442,61 @@ public:
                 cout << endl << "You failed mission..." << endl;
                 exit(0);
             }
-        }  
-    }
-
-    void VictoryCondition(Levels level)
-    {
-        if (player->GetHealth() > 0)
-        {
-            if (level == level6 && anyEnemyAlive)
-            {
-                BattleLoop(player, level1);
-            }
-
-            if (anyEnemyAlive)
-            {
-                BattleLoop(player, level);
-            }
         }
     }
-
-    // Level architecture to be shown in each level
-    void LevelPattern(Levels level)
-    {
-        if (level == level6)
-        {
-            cout << endl << "__________Level-" << level << "__________" << endl;
-            cout << "__________Final-Level__________" << endl << endl;
-        }
-        else
-        {
-            cout << endl << "__________Level-" << level << "__________" << endl << endl;
-        }
-        cout << "Welcome Demon Lord your stats for level " << level << " are: " << endl;
-        player->Stats(level);
-        cout << endl;
-        if (level == level6)
-        {
-            cout << endl << "__________Boss Fight__________" << endl;
-            cout << "__________Demon Lord vs God__________" << endl << endl;
-        }
-        else
-        {
-            cout << endl << "__________Enemies in level " << level <<"__________" << endl;
-        }
-        for( int i = 1; i <= level; i++)
-        {
-            if (level == level6)
-            {
-                break;
-            }
-            else
-            {
-                cout << i << ") Enemy " << i << endl;
-            }
-        }
-        cout << endl << "__________Fight__________" << endl;
-        cout << endl << endl;
-        cout << "Press 'y' to continue...\n";
-    }
-
-    virtual void InitializePlayerandEnemy() = 0;
-
-    virtual void LevelStart() = 0;
-
+    virtual void LevelPattern() = 0;
+    virtual void GameLoop() = 0;
 };
 
 class Level1 : public Level
 {
-private:
-    Levels currentLevel = level1;
 public:
-
     Level1()
-    {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
     {
         player = new Player(100, 50, 30, 20);
         enemy.push_back(new Enemy(100, 20, 20, 10));
         hasEnemyDied.push_back(false);
+        GameLoop();
     }
-    void LevelStart()
+    
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-1__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 1 are: " << endl;
+        player->Stats(level1);
+        cout << endl << endl << "__________Enemies in level 1__________" << endl;
+        for( int i = 1; i <= level1; i++)
+        {
+            cout << i << ") Enemy " << i << endl;
+        }
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
                 {
-                    cout << "\nCongrats You have cleared level 1.\nYou have received a map.\n";
+                    BattleLoop();
+                }
+                if (AllTrue())
+                {
+                    cout << endl << "Congrats You have cleared level 1." << endl;
+                    cout << endl << "You have received a map" << endl;
                 }
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
@@ -618,42 +504,49 @@ public:
 
 class Level2 : public Level
 {
-private:
-    Levels currentLevel = level2;
 public:
-
     Level2()
     {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
-    {
+        player = new Player(200, 70, 40, 40);
         enemy.clear();
         hasEnemyDied.clear();
-        for (int i = 1; i <= currentLevel; i++)
+        for (int i = 1; i <= level2; i++)
         {
             enemy.push_back(new Enemy(150, 50, 25, 20));
             hasEnemyDied.push_back(false);
         }
-        player = new Player(200, 70, 40, 40);
+        GameLoop();
     }
-    void LevelStart()
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-2__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 2 are: " << endl;
+        player->Stats(level2);
+        cout << endl << endl << "__________Enemies in level 2__________" << endl;
+        for( int i = 1; i <= level2; i++)
+        {
+            cout << i << ") Enemy " << i << endl;
+        }
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
+                {
+                    BattleLoop();
+                }
+                if (AllTrue())
                 {
                     player->EnableItemandAbility(criticalHits, sword);
                     cout << "\nCongrats You have cleared level 2.\nYou have received a sword and obtained a special ability Critical Hits.\n";
@@ -661,7 +554,7 @@ public:
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
@@ -669,42 +562,49 @@ public:
 
 class Level3 : public Level
 {
-private:
-    Levels currentLevel = level3;
 public:
-
     Level3()
     {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
-    {
+        player = new Player(300, 90, 50, 60);
         enemy.clear();
         hasEnemyDied.clear();
-        for (int i = 1; i <= currentLevel; i++)
+        for (int i = 1; i <= level3; i++)
         {
             enemy.push_back(new Enemy(200, 60, 30, 25));
             hasEnemyDied.push_back(false);
         }
-        player = new Player(300, 90, 50, 60);
+        GameLoop();
     }
-    void LevelStart()
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-3__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 3 are: " << endl;
+        player->Stats(level3);
+        cout << endl << endl << "__________Enemies in level 3__________" << endl;
+        for( int i = 1; i <= level3; i++)
+        {
+            cout << i << ") Enemy " << i << endl;
+        }
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
+                {
+                    BattleLoop();
+                }
+                if (AllTrue())
                 {
                     player->EnableItemandAbility(block, shield);
                     cout << "\nCongrats You have cleared level 3.\nYou have received a shield and obtained a special ability Block.\n";
@@ -712,7 +612,7 @@ public:
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
@@ -720,42 +620,49 @@ public:
 
 class Level4 : public Level
 {
-private:
-    Levels currentLevel = level4;
 public:
-
     Level4()
     {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
-    {
+        player = new Player(400, 110, 60, 80);
         enemy.clear();
         hasEnemyDied.clear();
-        for (int i = 1; i <= currentLevel; i++)
+        for (int i = 1; i <= level4; i++)
         {
             enemy.push_back(new Enemy(250, 70, 35, 30));
             hasEnemyDied.push_back(false);
         }
-        player = new Player(400, 110, 60, 80);
+        GameLoop();
     }
-    void LevelStart()
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-4__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 4 are: " << endl;
+        player->Stats(level4);
+        cout << endl << endl << "__________Enemies in level 4__________" << endl;
+        for( int i = 1; i <= level4; i++)
+        {
+            cout << i << ") Enemy " << i << endl;
+        }
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
+                {
+                    BattleLoop();
+                }
+                if (AllTrue())
                 {
                     player->EnableItemandAbility(invincible, armor);
                     cout << "\nCongrats You have cleared level 4.\nYou have received a armor and obtained a special ability Invincibility.\n";
@@ -763,7 +670,7 @@ public:
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
@@ -771,42 +678,49 @@ public:
 
 class Level5 : public Level
 {
-private:
-    Levels currentLevel = level5;
 public:
-
     Level5()
     {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
-    {
+        player = new Player(500, 130, 70, 100);
         enemy.clear();
         hasEnemyDied.clear();
-        for (int i = 1; i <= currentLevel; i++)
+        for (int i = 1; i <= level5; i++)
         {
             enemy.push_back(new Enemy(300, 80, 40, 35));
             hasEnemyDied.push_back(false);
         }
-        player = new Player(500, 130, 70, 100);
+        GameLoop();
     }
-    void LevelStart()
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-5__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 5 are: " << endl;
+        player->Stats(level5);
+        cout << endl << endl << "__________Enemies in level 5__________" << endl;
+        for( int i = 1; i <= level5; i++)
+        {
+            cout << i << ") Enemy " << i << endl;
+        }
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
+                {
+                    BattleLoop();
+                }
+                if (AllTrue())
                 {
                     player->EnableItemandAbility(lifesteal, bow);
                     cout << "\nCongrats You have cleared level 5.\nYou have received a bow and obtained a special ability Life Steal.\n";
@@ -814,7 +728,7 @@ public:
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
@@ -822,121 +736,118 @@ public:
 
 class Level6 : public Level
 {
-private:
-    Levels currentLevel = level6;
 public:
-
     Level6()
     {
-        LevelStart();
-    }
-
-    void InitializePlayerandEnemy()
-    {
+        player = new Player(600, 150, 80, 120);
         enemy.clear();
         hasEnemyDied.clear();
         enemy.push_back(new God(500, 140, 80, 125));
         hasEnemyDied.push_back(false);
-        player = new Player(600, 150, 80, 120);
+        GameLoop();
     }
-    void LevelStart()
+    void LevelPattern()
+    {
+        cout << endl << "__________Level-6__________" << endl;
+        cout << "__________Final Level__________" << endl << endl;
+        cout << "Welcome Demon Lord your stats for level 6 are: " << endl;
+        player->Stats(level6);
+        cout << endl << endl << "__________Boss Fight__________" << endl;
+        cout << "__________Demon Lord vs God__________" << endl;
+        cout << endl << endl << "__________Enemy in level 6__________" << endl;
+        cout << "1) God(Boss Fight)" << endl;
+        cout << endl << endl;
+        cout << "Press 'y' to continue..." << endl;
+    }
+    void GameLoop()
     {
         char input;
         bool validInput = false;
-        InitializePlayerandEnemy();
-        LevelPattern(currentLevel);
-        while (!validInput) 
+        LevelPattern();
+        while(!validInput)
         {
             cin >> input;
-            if (tolower(input) == 'y') 
+            if (tolower(input) == 'y')
             {
                 validInput = true;
-                input = '\0';
                 cout << endl << "Welcome Demon Lord, press 'a' to attack enemy and 'h' to heal...";
-                VictoryCondition(currentLevel);
-                if (allTrue)
+                while(player->GetHealth() > 0 && AnyEnemyAlive())
+                {
+                    BattleLoop();
+                }
+                if (AllTrue())
                 {
                     cout << "\nCongrats You have cleared level 6.\nYou Won, You have defeated King of Gods and now you are new ruler of city of EM.\n";
-                    exit(0);
                 }
             }
             else
             {
-            cout << endl << "Wrong Input, try again..." << endl;
+                cout << endl << "Wrong input, try again..." << endl;
             }
         }
     }
 };
 
-class GameManager {
+class LevelManager
+{
 private:
-    Levels currentLevel;
-    Level* level;
-
+    Levels currentLevel = level1;
+    Level* level = nullptr;
 public:
-    GameManager() {
-        currentLevel = level1;
-        level = nullptr;
-        PlayGame();
+    LevelManager()
+    {
+        Story();
+        NewLevel();
     }
-
-    ~GameManager() {
-        delete level;
+    void Story()
+    {
+        cout << "\nWelcome to the text-based RPG game where you embark on an epic journey with the demon lord to avenge his death and defeat the king of gods.\n\nIn this world, the city of EM was once a peaceful kingdom protected by a demon lord. However, a mystical door appeared one day, leading to the GOD realm, where a greedy king ruled over all the gods. The king coveted the beautiful city of EM and decided to sign a peace treaty as a cover to capture it.\n\nAfter a decade of negotiations, both parties agreed to the treaty. On the day of the signing, the demon lord hosted a party at his mansion. The king of gods poisoned the demon lord's drink, and realizing he wouldn't survive, the demon lord cast a reincarnation spell, vowing to take revenge on the king of gods in his next life.\n\nFifteen years later, the king of gods appointed new staff for the demon lord's mansion, and a wandering demon entered the sealed room where the demon lord died. The demon died suddenly, and within 15 seconds, the reincarnation spell activated, and the demon lord's soul possessed the demon's body, getting reincarnated. Now, the demon lord must defeat five labyrinths to defeat the king of gods. Each labyrinth is guarded by the king's appointed guards. After defeating each labyrinth, the demon lord gains special rewards and increased stats.\n\nAre you ready to join the demon lord on this epic adventure and defeat the king of gods?" << endl;
     }
-
-    void MoveToNextLevel() {
-        if (level != nullptr) {
-            delete level;
-        }
-
-        switch (currentLevel) {
-            case level1:
-                level = new Level1();
-                break;
-            case level2:
-                level = new Level2();
-                break;
-            case level3:
-                level = new Level3();
-                break;
-            case level4:
-                level = new Level4();
-                break;
-            case level5:
-                level = new Level5();
-                break;
-            case level6:
-                level = new Level6();
-                break;
-            default:
-                level = nullptr;
-                break;
-        }
-
-        if (level != nullptr) {
-            level->LevelStart();
-            currentLevel = static_cast<Levels>(currentLevel + 1);
-            if (currentLevel > level6) {
-                currentLevel = level6;
-            }
-        }
-    }
-
-    void PlayGame() {
+    void NewLevel()
+    {
         char input;
-        bool validInput = false;
-        while (!validInput) {
-            cout << "Press 'm' to move to the next level or 'q' to quit: ";
-            cin >> input;
-            if (tolower(input) == 'm') {
-                validInput = true;
-                MoveToNextLevel();
-            } else if (tolower(input) == 'q') {
-                validInput = true;
-                cout << "Quitting the game..." << endl;
-                exit(0);
-            } else {
-                cout << "Wrong Input, try again..." << endl;
+        while (true)
+        {
+            bool validInput = false;
+            while (!validInput)
+            {
+                cout << "Input 'm' to go to new level...\nInput: ";
+                cin >> input;
+                if (tolower(input) == 'm')
+                {
+                    validInput = true;
+                    switch (currentLevel)
+                    {
+                        case level1:
+                            level = new Level1();
+                            currentLevel = level2;
+                            break;
+                        case level2:
+                            level = new Level2();
+                            currentLevel = level3;
+                            break;
+                        case level3:
+                            level = new Level3();
+                            currentLevel = level4;
+                            break;
+                        case level4:
+                            level = new Level4();
+                            currentLevel = level5;
+                            break;
+                        case level5:
+                            level = new Level5();
+                            currentLevel = level6;
+                            break;
+                        case level6:
+                            level = new Level6();
+                            exit(0);
+                            break;
+                    }
+                }
+                else
+                {
+                    cout << endl << "Wrong Input, try again..." << endl;
+                }
             }
         }
     }
@@ -944,6 +855,6 @@ public:
 
 int main()
 {
-    GameManager game;
+    LevelManager* game = new LevelManager();
     return 0;
 }
