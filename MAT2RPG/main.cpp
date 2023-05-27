@@ -14,7 +14,11 @@ enum Ability { criticalHits, lifesteal, block, invincible };
 
 int randomNumber(int min = 0, int max = 100)
 {
-    srand(static_cast<unsigned int>(time(0)));
+    static bool initialized = false;
+    if (!initialized) {
+        srand(static_cast<unsigned int>(time(0)));
+        initialized = true;
+    }
     int randNum = (rand() % max) + min;
     return randNum;
 }
@@ -53,13 +57,16 @@ public:
         int maxHealthPercent = (GetMaxHealth() * percent) / 100;
         return maxHealthPercent;
     }
-    void Stats(Levels level) { cout << "Health: " << health << "\nAttack Power: " << attackPower << "\nHeal: " << heal << "\nDefence: " << defence; }
-    void EnableItemandAbility(Ability ability, Items it) {/*Enabling items and abilities of player*/}
+    virtual void Stats(Levels level) { cout << "Health: " << health << "\nAttack Power: " << attackPower << "\nHeal: " << heal << "\nDefence: " << defence; }
+    virtual void EnableItemandAbility(Ability ability, Items it) {/*Enabling items and abilities of player*/}
     virtual void Attack(CharacterController* other) = 0;
     virtual int Defence(int damage) = 0;
     virtual void Heal() = 0;
     virtual void TakeDamage(int damage) = 0;
-    virtual ~CharacterController();
+    virtual ~CharacterController()
+    {
+        //CharacterController destructor
+    };
 };
 
 class Player : public CharacterController {
@@ -73,7 +80,7 @@ public:
     Player(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
     bool HasItemandAbility(Ability ability, Items it)
     {
-        return (count(abilities.begin(), abilities.end(), ability > 0) && count(item.begin(), item.end(), it > 0));
+        return (count(abilities.begin(), abilities.end(), ability) > 0 && count(item.begin(), item.end(), it) > 0);
     }
     void EnableItemandAbility(Ability ability, Items it)
     {
@@ -117,103 +124,99 @@ public:
     void Attack(CharacterController* enemy)
     {
         int randomDamage = 0;
-        randomDamage += randomNumber(20, GetAttackPower());
-        if (HasItemandAbility(criticalHits, sword))
+        randomDamage += randomNumber(20, this->GetAttackPower());
+        if (this->HasItemandAbility(lifesteal, bow))
+        {
+            randomDamage += (rangedDamage + meleeDamage);
+            if (randomNumber() < 10) 
+            {
+                if (randomNumber(0, 2) > 0) // special ability life steal if random number is 1
+                {
+                    cout << endl << "Special ability life steal activated..." << endl;
+                    cout << "Player's health increased by 50 points..." << endl;
+                    cout << "Player's previous health: " << GetHealth() << endl;
+                    cout << "Enemy's previous health: " << enemy->GetHealth() << endl;
+                    enemy->SetHealth(enemy->GetHealth() - 50);
+                    this->SetHealth(this->GetHealth() + 50);
+                    cout << "Player's current health: " << GetHealth() << endl;
+                    cout << "Enemy's current health: " << enemy->GetHealth() << endl << endl;
+                }
+                else // special ability critical hit if random number is 0
+                {
+                    cout << endl << "Special ability critical hits activated... Dealt additional damage of 5 points..." << endl;
+                    randomDamage += 5;
+                }
+            }
+        }
+        else if (this->HasItemandAbility(criticalHits, sword))
         {
             randomDamage += meleeDamage;
             if (randomNumber() < 10) // special ability for critical hit
             {
                 cout << endl << "Special ability critical hits activated... Dealt additional damage of 5 points..." << endl;
-                randomDamage + 5;
-            }
-
-            else
-            {
-                if (HasItemandAbility(lifesteal, bow))
-                {
-                    randomDamage += rangedDamage;
-                    if (randomNumber() < 10) 
-                    {
-                        if (randomNumber(0, 2) > 0) // special ability life steal if random number is 1
-                        {
-                            cout << endl << "Special ability life steal activated..." << endl;
-                            cout << "Player's health increased by 50 points..." << endl;
-                            cout << "Player's previous health: " << GetHealth() << endl;
-                            cout << "Enemy's previous health: " << enemy->GetHealth() << endl;
-                            enemy->SetHealth(enemy->GetHealth() - 50);
-                            SetHealth(GetHealth() + 50);
-                            cout << "Player's current health: " << GetHealth() << endl;
-                            cout << "Enemy's current health: " << enemy->GetHealth() << endl << endl;
-                        }
-                        else // special ability critical hit if random number is 0
-                        {
-                            cout << endl << "Special ability critical hits activated... Dealt additional damage of 5 points..." << endl;
-                            randomDamage + 5;
-                        }
-                    }
-                    
-                }
+                randomDamage += 5;
             }
         }
+        cout << endl << "Enemy's Health (before damage): " << enemy->GetHealth() << endl;
+        cout << endl << "Enemy took damage of " << enemy->Defence(randomDamage) << endl;
+        enemy->TakeDamage(randomDamage);
+        cout << endl << "Enemy's current Health (after damage): " << enemy->GetHealth() << endl;
     }
+
     void Heal()
     {
-        if (GetHealth() == GetMaxHealth())
+        if (this->GetHealth() == this->GetMaxHealth())
         {
             cout << endl << "Player is already at full health..." << endl;
             return;
         }
         cout << endl << "Player's health (before heal): " << GetHealth() << endl;
-        int randHeal = randomNumber(15, GetHeal());
-        int remainingHeal = GetMaxHealth() - GetHealth();
+        int randHeal = randomNumber(15, this->GetHeal());
+        int remainingHeal = this->GetMaxHealth() - this->GetHealth();
         randHeal = min(randHeal, remainingHeal); // Limit heal amount to not exceed maxHealth
 
         cout << endl << "Healing done: " << randHeal << " points" << endl;
-        SetHealth(GetHealth() + randHeal);
+        this->SetHealth(this->GetHealth() + randHeal);
 
-        cout << endl << "Player's health (after heal): " << GetHealth() << endl;
+        cout << endl << "Player's health (after heal): " << this->GetHealth() << endl;
     }
     int Defence(int damage)
     {
-        int totalDamage = damage;
-        damage -= GetDefence();
-        if (HasItemandAbility(block, shield)) // if shield is unlocked
+        damage -= this->GetDefence();
+        if (this->HasItemandAbility(invincible, armor)) // checking if armor is unlocked
+        {
+            damage -= 10;
+            if (randomNumber() < 10) 
+            {
+                if (randomNumber(0, 2) > 0) // activating invincible ability if random number is 1
+                {
+                    cout << endl <<"Special ability invincible activated...\nDamage taken: 0 points..." << endl;
+                    damage = 0;
+                }
+                else // activating block if random number is 0
+                {
+                    cout << endl << "Special ability block activated...\nOnly 1\% of actual damage is taken by the player" << endl;
+                    damage = (damage * 1) / 100;
+                }
+            }
+        }      
+        else if (this->HasItemandAbility(block, shield)) // if shield is unlocked
         {
             damage -= 10;
             if (randomNumber() < 10) // checking if special ability block is activated
             {
                 cout << endl << "Special ability block activated...\nOnly 1\% of actual damage is taken by the player" << endl;
-                damage = (totalDamage * 1) / 100;
+                damage = (damage * 1) / 100;
             }
-            else
-            {
-                if (HasItemandAbility(invincible, armor)) // checking if armor is unlocked
-                {
-                    damage -= 10;
-                    if (randomNumber() < 10) 
-                    {
-                        if (randomNumber(0, 2) > 0) // activating invincible ability if random number is 1
-                        {
-                            cout << endl <<"Special ability invincible activated...\nDamage taken: 0 points..." << endl;
-                            damage = 0;
-                        }
-                        else // activating block if random number is 0
-                        {
-                            cout << endl << "Special ability block activated...\nOnly 1\% of actual damage is taken by the player" << endl;
-                            damage = (totalDamage * 1) / 100;
-                        }
-                    }
-                }
-            }
-        }        
+        }  
         return abs(damage);
     }
     void TakeDamage(int damage)
     {
-        SetHealth(GetHealth() - Defence(damage));
-        if (GetHealth() < 0)
+        this->SetHealth(this->GetHealth() - this->Defence(damage));
+        if (this->GetHealth() < 0)
         {
-            SetHealth(0);
+            this->SetHealth(0);
         }
     }
     ~Player(){ cout << endl << "Player died..." << endl; }
@@ -224,14 +227,14 @@ public:
     Enemy(int hp, int atck, int hl, int def) : CharacterController(hp, atck, hl, def){}
     void Attack(CharacterController* player)
     {
-        int randomDamage;
+        int randomDamage = 0;
         randomDamage = randomNumber(10, GetAttackPower());
-        if (GetHealth() > HealthPercent(50)) // If health is > 50% then attack damage will be 10 points extra
+        if (this->GetHealth() > this->HealthPercent(50)) // If health is > 50% then attack damage will be 10 points extra
         {
             randomDamage += 10;
         }
 
-        else if (GetHealth() < HealthPercent(25)) // If health is < 25% then attack damage will br 20 points extra
+        else if (this->GetHealth() < this->HealthPercent(25)) // If health is < 25% then attack damage will br 20 points extra
         {
             randomDamage += 20;
         }
@@ -242,49 +245,49 @@ public:
     }
     void Heal()
     {
-        int randHeal;
-        if (GetHealth() == GetMaxHealth())
+        int randHeal = 0;
+        if (this->GetHealth() == this->GetMaxHealth())
         {
             cout << endl << "Enemy is already at full health..." << endl;
         }
         else
         {
-            if (GetHealth() > HealthPercent(50))
+            if (this->GetHealth() > this->HealthPercent(50))
             {
-                randHeal = randomNumber(1, GetHeal());
+                randHeal = randomNumber(1, this->GetHeal());
             }
             else
             {
-                randHeal = randomNumber(5, GetHeal());
+                randHeal = randomNumber(5, this->GetHeal());
             }
             
-            cout << endl << "Enemy's health (before heal): " << GetHealth() << endl;
-            SetHealth(GetHealth() + randHeal);
+            cout << endl << "Enemy's health (before heal): " << this->GetHealth() << endl;
+            this->SetHealth(this->GetHealth() + randHeal);
             
-            if (GetHealth() > GetMaxHealth())
+            if (this->GetHealth() > this->GetMaxHealth())
             {
-                randHeal -= (GetHealth() - GetMaxHealth());
-                SetHealth(GetMaxHealth());
+                randHeal -= (this->GetHealth() - this->GetMaxHealth());
+                this->SetHealth(this->GetMaxHealth());
             }
             
             cout << endl << "Enemy gained heal of " << randHeal << " points" << endl;
-            cout << endl << "Enemy's health (after heal): " << GetHealth() << endl;
+            cout << endl << "Enemy's health (after heal): " << this->GetHealth() << endl;
         }
     }
     int Defence(int damage)
     {
-        if (GetHealth() < HealthPercent(10))
+        if (this->GetHealth() < this->HealthPercent(10))
         {
-            damage -= GetDefence();
+            damage -= this->GetDefence();
         }
         return abs(damage);
     }
     void TakeDamage(int damage)
     {
-        SetHealth(GetHealth() - Defence(damage));
-        if (GetHealth() < 0)
+        this->SetHealth(this->GetHealth() - this->Defence(damage));
+        if (this->GetHealth() < 0)
         {
-            SetHealth(0);
+            this->SetHealth(0);
         }
     }
     ~Enemy(){ cout << endl << "Enemy died..." << endl; }
@@ -301,15 +304,15 @@ public:
     }
     void Attack(CharacterController* player)
     {
-        int randomDamage;
-        randomDamage += randomNumber(70, GetAttackPower());
+        int randomDamage = 0;
+        randomDamage += randomNumber(70, this->GetAttackPower());
 
-        if (GetHealth() > HealthPercent(50)) // If health is > 50% then attack damage will be 20 points extra
+        if (this->GetHealth() > this->HealthPercent(50)) // If health is > 50% then attack damage will be 20 points extra
         {
             randomDamage += 20;
         }
 
-        else if (GetHealth() < HealthPercent(25)) // If health is < 25% then attack damage will be 30 points extra
+        else if (this->GetHealth() < this->HealthPercent(25)) // If health is < 25% then attack damage will be 30 points extra
         {
             randomDamage += 30;
         }
@@ -331,49 +334,49 @@ public:
     }
     void Heal()
     {
-        int randHeal;
-        if (GetHealth() == GetMaxHealth())
+        int randHeal = 0;
+        if (this->GetHealth() == this->GetMaxHealth())
         {
             cout << endl << "God is already at full health..." << endl;
         }
         else
         {
-            if (GetHealth() > HealthPercent(50))
+            if (this->GetHealth() > this->HealthPercent(50))
             {
-                randHeal = randomNumber(20, GetHeal());
+                randHeal = randomNumber(20, this->GetHeal());
             }
             else
             {
-                randHeal = randomNumber(30, GetHeal());
+                randHeal = randomNumber(30, this->GetHeal());
             }
             
-            cout << endl << "God's health (before heal): " << GetHealth() << endl;
-            SetHealth(GetHealth() + randHeal);
+            cout << endl << "God's health (before heal): " << this->GetHealth() << endl;
+            this->SetHealth(this->GetHealth() + randHeal);
             
-            if (GetHealth() > GetMaxHealth())
+            if (this->GetHealth() > this->GetMaxHealth())
             {
-                randHeal -= (GetHealth() - GetMaxHealth());
-                SetHealth(GetMaxHealth());
+                randHeal -= (this->GetHealth() - this->GetMaxHealth());
+                this->SetHealth(this->GetMaxHealth());
             }
 
             cout << endl << "God gained heal of " << randHeal << " points" << endl;
-            cout << endl << "God's health (after heal): " << GetHealth() << endl;
+            cout << endl << "God's health (after heal): " << this->GetHealth() << endl;
         }
     }
     int Defence(int damage)
     {
-        if (GetHealth() < HealthPercent(10))
+        if (this->GetHealth() < this->HealthPercent(10))
         {
-            damage -= GetDefence();
+            damage -= this->GetDefence();
         }
         return abs(damage);
     }
     void TakeDamage(int damage)
     {
-        SetHealth(GetHealth() - Defence(damage));
-        if (GetHealth() < 0)
+        this->SetHealth(this->GetHealth() - this->Defence(damage));
+        if (this->GetHealth() < 0)
         {
-            SetHealth(0);
+            this->SetHealth(0);
         }
     }
     ~God(){ cout << endl << "King of Gods was defeated..." << endl; }
